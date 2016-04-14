@@ -1,11 +1,13 @@
 #!/usr/bin/python3
-# Generate testssl.sh mass scan input file from list of open ports in host:port format.
+# Generate testssl.sh input file for GNU parallel from list of open ports in host:port format.
+# Parallel invocation: parallel < output_of_this_script
 
 import fileinput
 import re
 
 ### Configuration of STARTTLS ports ###
-addParams = "--logfile=log --jsonfile=json --csvfile=csv"
+testsslPath = "testssl.sh/testssl.sh"
+addParams = "--warnings=batch --openssl-timeout=60 --logfile=log --jsonfile=json --csvfile=csv"
 starttlsPorts = {
         21: "ftp",
         25: "smtp",
@@ -21,6 +23,6 @@ for line in fileinput.input():
     port = int(m.group(2))
 
     if port in starttlsPorts:
-        print("%s --starttls %s %s:%d" % (addParams, starttlsPorts[port], host, port))
+        print("%s %s --starttls %s %s:%d" % (testsslPath, addParams, starttlsPorts[port], host, port))
     else:
-        print("%s %s:%d" % (addParams, host, port))
+        print("%s %s %s:%d" % (testsslPath, addParams, host, port))
