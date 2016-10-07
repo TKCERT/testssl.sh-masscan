@@ -4,10 +4,16 @@
 
 import fileinput
 import re
+import argparse
+import sys
+
+argparser = argparse.ArgumentParser(description="Read host:port lines from text import file and create testssl.sh command lines")
+argparser.add_argument("--command", "-c", default="testssl.sh", help="Invocation of testssl.sh")
+argparser.add_argument("--arguments", "-a", default="--warnings=batch --openssl-timeout=60 --log --json --csv", help="Additional arguments for each testssl.sh invocation")
+argparser.add_argument("files", nargs="*", help="List of input files. Each line must contain a host:port entry")
+args = argparser.parse_args()
 
 ### Configuration of STARTTLS ports ###
-testsslPath = "testssl.sh/testssl.sh"
-addParams = "--warnings=batch --openssl-timeout=60 --logfile=log --jsonfile=json --csvfile=csv"
 starttlsPorts = {
         21: "ftp",
         25: "smtp",
@@ -17,12 +23,15 @@ starttlsPorts = {
 
 reInputLine = re.compile("^(.*):(\d+)$")
 
-for line in fileinput.input():
+for line in fileinput.input(args.files):
     m = reInputLine.match(line)
-    host = m.group(1)
-    port = int(m.group(2))
-
-    if port in starttlsPorts:
-        print("%s %s --starttls %s %s:%d" % (testsslPath, addParams, starttlsPorts[port], host, port))
+    if not m:
+        print("Ignoring %s:%s due to parse errors" % (fileinput.filename(), fileinput.filelineno()), file=sys.stderr)
     else:
-        print("%s %s %s:%d" % (testsslPath, addParams, host, port))
+        host = m.group(1)
+        port = int(m.group(2))
+
+        if port in starttlsPorts:
+            print("%s %s --starttls %s %s:%d" % (args.command, args.arguments, starttlsPorts[port], host, port))
+        else:
+            print("%s %s %s:%d" % (args.command, args.arguments, host, port))
