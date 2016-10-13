@@ -171,6 +171,9 @@ class DocTestSSLResult(DocType):
     def save(self, **kwargs):
         if not self.timestamp:
             self.timestamp = datetime.now(tz)
+        if not self.port:
+            raise ValueError("Empty scan result")
+
         self.svcid = "%s:%d" % (self.ip, int(self.port) or 0)
         if not self.result:
             self.result = False

@@ -33,4 +33,7 @@ for csvFile in csvFiles:
     doc = DocTestSSLResult(source=csvFile)
     doc.parseCSV(csv)
     csv.close()
-    doc.save()
+    try:
+        doc.save()
+    except ValueError:
+        print("File %s was empty!" % (csvFile))
