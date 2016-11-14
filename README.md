@@ -36,3 +36,9 @@ Visualize vulnerability distribution:
 5. Run `import_testssl.sh_csv_to_ES.py *.csv` to import scan results into ElasticSearch.
 6. View/Analyze data with [Kibana](https://www.elastic.co/de/products/kibana) or the tool of your choice.
 7. Fix your TLS configurations :)
+
+## Useful Command Lines
+
+List all vulnerabilities in "host;port;vulnerabilities" CSV format:
+
+    curl -qsk 'localhost:9200/testssl-*/_search?q=_exists_:vulnerabilities&size=10000' | jq -r '.hits.hits[]._source | [ .ip, ( .port | tostring ), ( .vulnerabilities | join(", ") ) ] | join(";")'
