@@ -42,3 +42,7 @@ Visualize vulnerability distribution:
 List all vulnerabilities in "host;port;vulnerabilities" CSV format:
 
     curl -qsk 'localhost:9200/testssl-*/_search?q=_exists_:vulnerabilities&size=10000' | jq -r '.hits.hits[]._source | [ .ip, ( .port | tostring ), ( .vulnerabilities | join(", ") ) ] | join(";")'
+
+...and add ciphertests field:
+
+    curl -qsk 'localhost:9200/testssl-*/_search?q=_exists_:(vulnerabilities+ciphertests)&size=10000' | jq -r '.hits.hits[]._source | [ .ip, ( .port | tostring ), ( .vulnerabilities | if . == null then "" else (. | join(", ") ) end ), ( .ciphertests | if . == null then "" else (. | join(", ") ) end ) ] | join(";")
